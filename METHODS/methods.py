@@ -65,18 +65,59 @@ def extract_information(file_location):
     for geom_object in geom_array:
         try:
             match geom_object['alg']:
+
+                ### POINTS ###
+
+                #Free points
                 case 'Free':
+                    #only incidences are those given by incidences
                     incids = geom_object["incidences"]
                     incid_array = []
                     for incid in incids:
                         incid_array.append(name_dict[incid])
                     incidences[name_dict[geom_object['name']]] = incid_array
-                case 'Join':
-                    pass
+                
+                #meets of two lines
                 case 'Meet':
-                    pass
+                    #incident to the two meeting lines and their incidences
+                    incids = list(set(geom_object["incidences"]).union(set(geom_object["args"])))
+                    incid_array = []
+                    for incid in incids:
+                        incid_array.append(name_dict[incid])
+                    incidences[name_dict[geom_object['name']]] = incid_array
+
+                    #also add this point as incidence of the lines it lies on
+                    ref_line1 = name_dict[geom_object['args'][0]]
+                    incidences[ref_line1] = list(set(incidences[ref_line1]).union({name_dict[geom_object['name']]}))
+                    ref_line2 = name_dict[geom_object['args'][1]]
+                    incidences[ref_line2] = list(set(incidences[ref_line2]).union({name_dict[geom_object['name']]}))
+
+                #Points defined on a line
                 case 'PointOnLine':
-                    incids = set(geom_object["incidences"]).union(set())
+                    #incident to the line they are defined on and their other incidences
+                    incids = list(set(geom_object["incidences"]).union(set(geom_object["args"])))
+                    incid_array = []
+                    for incid in incids:
+                        incid_array.append(name_dict[incid])
+                    incidences[name_dict[geom_object['name']]] = incid_array
+
+                    #also add this point as incidence of the line it lies on
+                    ref_line = name_dict[geom_object['args'][0]]
+                    incidences[ref_line] = list(set(incidences[ref_line]).union({name_dict[geom_object['name']]}))
+
+                ### LINES ###
+
+                #joins of two points
+                case 'Join':
+                    #these lines are incident to the points spanning them and their other incidences
+                    #also they are incident to the points on lines defined on it, and the meets of it with other lines (these will be added when the respective points are treated)
+                    try:
+                        #try to get incids, they might not exist
+                        incids1 = set(geom_object["incidences"])
+                    except:
+                        incids1 = set()
+                    #transform to set to get union and then transform back to list
+                    incids = list(incids1.union(set(geom_object["args"])))
                     incid_array = []
                     for incid in incids:
                         incid_array.append(name_dict[incid])
