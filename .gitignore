@@ -13,7 +13,8 @@ node_modules/
 __pycache__/
 *.py[cod]
 *$py.class
-
+METHODS/__pycache__/
+CLASSES/__pycache__/
 # C extensions
 *.so
 
