@@ -1,9 +1,16 @@
+from METHODS.methods import det
+
+from itertools import combinations
+
 class Construction:
     def __init__(self, points, lines, conics, incidences):
         self.points = points
         self.lines = lines
         self.conics = conics
         self.incidences = incidences
+        self.non_deg_points = set()
+        self.non_deg_lines = set()
+        self.tol = 10**(-14)
 
     def print_points(self):
         """Print a string containing all the points"""
@@ -69,8 +76,24 @@ class Construction:
 
     def calculate_point_non_degeneracies(self):
         """Uses the given positions to calculate point-triples that are NOT collinear and can thus be used in binomial proofs as non-degeneracy conditions"""
-        pass
+        #get all 3-element-subsets of points
+        non_deg_candidates = list(combinations(self.points, 3))
+        #calculate determinants for all candidates and add them to the set of nondegeneracies if the determinant is greater than the tolerance value
+        for candidate in non_deg_candidates:
+            determinant = det(candidate[0].homog, candidate[1].homog, candidate[2].homog)
+            print(str(determinant) + " " + str(candidate))
+            if determinant > self.tol:
+                self.non_deg_points.add(candidate)
+
 
     def calculate_line_non_degeneracies(self):
         """Uses the given positions to calculate line-triples that are NOT collinear and can thus be used in binomial proofs as non-degeneracy conditions"""
-        pass
+        #get all 3-element-subsets of lines
+        non_deg_candidates = list(combinations(self.lines, 3))
+        #calculate determinants for all candidates and add them to the set of nondegeneracies if the determinant is greater than the tolerance value
+        for candidate in non_deg_candidates:
+            determinant = det(candidate[0].homog, candidate[1].homog, candidate[2].homog)
+            print(str(determinant) + " " + str(candidate))
+            if determinant > self.tol:
+                self.non_deg_lines.add(candidate)
+
